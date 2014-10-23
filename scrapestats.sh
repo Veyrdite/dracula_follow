@@ -14,7 +14,7 @@ function grab()
 
 	test -f "$dest" && rm "$dest"
 
-	wget -o /dev/null -O "$dest" "$url" 
+	wget -o /dev/null -O "$dest" "$url"
 
 	if [ ! $? -eq 0 ]
 	then
@@ -93,7 +93,7 @@ function extract()
 
 	groupName=$( cat grouppage | grep 'Compilation log' | cut -f3 -d'/' | cut -f1 -d'.' )
 
-	while read line 
+	while read line
 	do
 		line="$( echo $line | grep -v "<p>")" # Avoid erroneous paragraphs
 
@@ -112,22 +112,22 @@ function extract()
 
 	# Determine the 'blood counts' from the end-games of logs
 	draculaGames=0
-	draculaBlood=0
+	draculaScore=0
 	hunterGames=0
-	hunterBlood=0
+	hunterScore=0
 	strangegames=0
-	
+
 	echo -n ' D'
 	for log in $asDracula
 	do
-		
+
 		grab "${main}/${log}" templog
-		blood=$(cat templog | tail | grep -P '^\t> Game Over' -A 2 | grep -P '^\t[0-9]')
+		score=$(cat templog | tail | grep -P '^\t.*score: [0-9]*$' | cut -f2 -d':')
 
 		if [ $? -eq 0 ]
 		then
 			echo -n '.'
-			draculaBlood=$(( $draculaBlood + $blood ))
+			draculaScore=$(( $draculaScore + $score ))
 			draculaGames=$(( $draculaGames + 1 ))
 		else
 			# Something screwed up
@@ -135,17 +135,17 @@ function extract()
 			strangegames=$(( $strangegames + 1 ))
 		fi
 	done
-	
+
 	echo -n ' H'
 	for log in $asHunter
 	do
 		grab "${main}/${log}" templog
-		blood=$(cat templog | tail | grep -P '^\t> Game Over' -A 2 | grep -P '^\t[0-9]')
+		score=$(cat templog | tail | grep -P '^\t> Game Over' -A 2 | grep -P '^\t[0-9]')
 
 		if [ $? -eq 0 ]
 		then
 			echo -n '.'
-			hunterBlood=$(( $hunterBlood + $blood ))
+			hunterScore=$(( $hunterScore + $score ))
 			hunterGames=$(( $hunterGames + 1 ))
 		else
 			# Something screwed up
@@ -161,26 +161,26 @@ function extract()
 	strangestring=''
 	if [ $draculaGames -ne 0 ]
 	then
-		dracResults=$(( $draculaBlood / $draculaGames ))
+		dracResults=$(( $draculaScore / $draculaGames ))
 	else
 		dracResults="???"
 	fi
 	if [ $hunterGames -ne 0 ]
 	then
-		huntResults=$(( $hunterBlood / $hunterGames ))
+		huntResults=$(( $hunterScore / $hunterGames ))
 	else
 		dracResults="???"
 	fi
 
 	test $strangegames -ne 0 && strangestring="with $strangegames unfin games"
 
-	echo -en '\033[99D' # Erase the '.'s we left behind	
-	printf "%40s %4s %4s    %s\n" "$groupName" $dracResults $huntResults "$strangestring" 
+	echo -en '\033[99D' # Erase the '.'s we left behind
+	printf "%40s %4s %4s    %s\n" "$groupName" $dracResults $huntResults "$strangestring"
 }
 
 echo
-message Results 
-echo "After each group name are two numbers.  These represent how many blood points were left behind \
+message Results
+echo "After each group name are two numbers.  These are the game scores left behind \
 (on average) for their matches.  When playing as Dracula: this should be as high as possible, and visa \
 versa for the hunters."
 echo Be patient -- this process downloads quite a few MB of data PER MATCH.  Watch as the racing snails \

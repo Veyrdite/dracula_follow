@@ -95,6 +95,8 @@ function extract()
 
 	while read line 
 	do
+		line="$( echo $line | grep -v "<p>")" # Avoid erroneous paragraphs
+
 		if ( echo "$line" | grep -q "d-${groupName}" )
 		then
 			asDracula+=" $( echo "$line" | cut -f2 -d'"' )"
@@ -104,6 +106,9 @@ function extract()
 		fi
 	done < grouppage
 
+	# Hack: remove ugly "??"s that appear in some group names
+	#asDracula="$( echo $asDracula | sed 's/??//g')"
+	#asHunter="$( echo $asHunter | sed 's/??//g')"
 
 	# Determine the 'blood counts' from the end-games of logs
 	draculaGames=0

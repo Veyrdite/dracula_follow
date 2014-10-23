@@ -110,32 +110,67 @@ function extract()
 	draculaBlood=0
 	hunterGames=0
 	hunterBlood=0
+	strangegames=0
 	
-	echo -n 'D'
+	echo -n ' D'
 	for log in $asDracula
 	do
+		
 		grab "${main}/${log}" templog
 		blood=$(cat templog | tail | grep -P '^\t> Game Over' -A 2 | grep -P '^\t[0-9]')
 
-		draculaBlood=$(( $draculaBlood + $blood ))
-		draculaGames=$(( $draculaGames + 1 ))
-		echo -n '.'
+		if [ $? -eq 0 ]
+		then
+			echo -n '.'
+			draculaBlood=$(( $draculaBlood + $blood ))
+			draculaGames=$(( $draculaGames + 1 ))
+		else
+			# Something screwed up
+			echo -n '?'
+			strangegames=$(( $strangegames + 1 ))
+		fi
 	done
 	
-	echo -n 'H'
+	echo -n ' H'
 	for log in $asHunter
 	do
 		grab "${main}/${log}" templog
 		blood=$(cat templog | tail | grep -P '^\t> Game Over' -A 2 | grep -P '^\t[0-9]')
 
-		hunterBlood=$(( $hunterBlood + $blood ))
-		hunterGames=$(( $hunterGames + 1 ))
-		echo -n '.'
+		if [ $? -eq 0 ]
+		then
+			echo -n '.'
+			hunterBlood=$(( $hunterBlood + $blood ))
+			hunterGames=$(( $hunterGames + 1 ))
+		else
+			# Something screwed up
+			echo -n '?'
+			strangegames=$(( $strangegames + 1 ))
+		fi
 	done
 
-	#Print results
+
+	### Print results
+	dracResults=''
+	huntResults=''
+	strangestring=''
+	if [ $draculaGames -ne 0 ]
+	then
+		dracResults=$(( $draculaBlood / $draculaGames ))
+	else
+		dracResults="???"
+	fi
+	if [ $hunterGames -ne 0 ]
+	then
+		huntResults=$(( $hunterBlood / $hunterGames ))
+	else
+		dracResults="???"
+	fi
+
+	test $strangegames -ne 0 && strangestring="with $strangegames unfin games"
+
 	echo -en '\033[99D' # Erase the '.'s we left behind	
-	printf "%40s %4d %4d\n" "$groupName" $(( $draculaBlood / $draculaGames ))  $(( $hunterBlood / $hunterGames ))
+	printf "%40s %4s %4s    %s\n" "$groupName" $dracResults $huntResults "$strangestring" 
 }
 
 echo
@@ -143,7 +178,8 @@ message Results
 echo "After each group name are two numbers.  These represent how many blood points were left behind \
 (on average) for their matches.  When playing as Dracula: this should be as high as possible, and visa \
 versa for the hunters."
-echo Be patient -- this process downloads quite a few MB of data PER MATCH.  Watch as the snails go by!
+echo Be patient -- this process downloads quite a few MB of data PER MATCH.  Watch as the racing snails \
+grow their tails!
 message "GROUP NAME                                DRAC HUNT"
 
 if [ $groupchoice == 'a' ]

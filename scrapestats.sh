@@ -122,11 +122,12 @@ function extract()
 	do
 
 		grab "${main}/${log}" templog
-		score=$(cat templog | tail | grep -P '^\t.*score: [0-9]*$' | cut -f2 -d':')
+		score=$(cat templog | grep -A 2 -P '^\t> End of game:' | grep -P 'score: -?[0-9]')
 
 		if [ $? -eq 0 ]
 		then
 			echo -n '.'
+			score=$( echo $score  | cut -f2 -d':' )
 			draculaScore=$(( $draculaScore + $score ))
 			draculaGames=$(( $draculaGames + 1 ))
 		else
@@ -140,11 +141,12 @@ function extract()
 	for log in $asHunter
 	do
 		grab "${main}/${log}" templog
-		score=$(cat templog | tail | grep -P '^\t> Game Over' -A 2 | grep -P '^\t[0-9]')
+		score=$(cat templog | grep -A 2 -P '^\t> End of game:' | grep -P 'score: -?[0-9]')
 
 		if [ $? -eq 0 ]
 		then
 			echo -n '.'
+			score=$( echo $score  | cut -f2 -d':' )
 			hunterScore=$(( $hunterScore + $score ))
 			hunterGames=$(( $hunterGames + 1 ))
 		else

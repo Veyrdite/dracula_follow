@@ -122,7 +122,7 @@ function extract()
 	do
 
 		grab "${main}/${log}" templog
-		score=$(cat templog | grep -A 2 -P '^\t> End of game:' | grep -P 'score: -?[0-9]')
+		score=$(cat templog | grep -A 2 '> End of game:' | egrep 'score: -?[0-9]')
 
 		if [ $? -eq 0 ]
 		then
@@ -141,7 +141,7 @@ function extract()
 	for log in $asHunter
 	do
 		grab "${main}/${log}" templog
-		score=$(cat templog | grep -A 2 -P '^\t> End of game:' | grep -P 'score: -?[0-9]')
+		score=$(cat templog | grep -A 2 '> End of game:' | egrep 'score: -?[0-9]')
 
 		if [ $? -eq 0 ]
 		then

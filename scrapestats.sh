@@ -14,8 +14,7 @@ function grab()
 
 	test -f "$dest" && rm "$dest"
 
-	# Limited to avoid this turning into an accidental denial of service
-	wget -o /dev/null -O "$dest" "$url" --limit-rate=100k
+	wget -o /dev/null -O "$dest" "$url" 
 
 	if [ ! $? -eq 0 ]
 	then
